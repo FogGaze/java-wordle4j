@@ -1,5 +1,9 @@
 package ru.yandex.practicum;
 
+import ru.yandex.practicum.exceptions.GameException;
+import ru.yandex.practicum.exceptions.GameOverException;
+import ru.yandex.practicum.exceptions.InvalidWordException;
+
 import java.io.PrintWriter;
 import java.util.*;
 
@@ -19,7 +23,7 @@ public class WordleGame {
 
     private String answer;
     private WordleDictionary dictionary;
-    private  int maxAttempts = 6;
+    private int maxAttempts = 6;
     private int attemptsMade;
     private boolean isWin;
     private List<String> guesses;
@@ -100,7 +104,7 @@ public class WordleGame {
     }
 
     public String analyzeGuess(String guess) {
-        char[] result =  {'-', '-', '-', '-', '-',};
+        char[] result = {'-', '-', '-', '-', '-',};
         StringBuilder sbAnswer = new StringBuilder(answer);
 
         for (int i = 0; i < answer.length(); i++) {

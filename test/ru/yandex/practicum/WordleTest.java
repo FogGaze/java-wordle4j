@@ -1,7 +1,10 @@
 package ru.yandex.practicum;
 
-import org.junit.jupiter.api.Assertions;
+import ru.yandex.practicum.exceptions.GameException;
+import ru.yandex.practicum.exceptions.GameOverException;
+import ru.yandex.practicum.exceptions.InvalidWordException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -18,6 +21,7 @@ class WordleTest {
     private WordleDictionary testWD;
     private PrintWriter log;
     private final List<String> testWords = new ArrayList<>(List.of("котел", "домен", "лесок", "город", "речка", "божок", "авгур"));
+    private Random random = new Random();
 
     @BeforeEach
     void setTest() {
@@ -27,68 +31,69 @@ class WordleTest {
         testWG.startNewGame();
     }
 
-    //Проверка, что словарь words_ru.txt корректного формата
     @Test
+    @DisplayName("Проверка, что словарь words_ru.txt корректного формата")
     void testLoadDictionaryCorrectFormat() throws IOException {
         WordleDictionaryLoader wdl = new WordleDictionaryLoader(new PrintWriter(log));
         for (String str : wdl.readWordleDictionary()) {
             assertEquals(5, str.length());
-            Assertions.assertFalse(str.contains("ё"));
+            assertFalse(str.contains("ё"));
         }
     }
 
-    //Проверка стартовых условий игры
     @Test
+    @DisplayName("Проверка стартовых условий игры")
     void testStartNewGame() {
         testWG.startNewGame();
-        Assertions.assertFalse(testWG.getIsWin());
-        Assertions.assertEquals(6, testWG.getAttempts());
-        Assertions.assertTrue(testWords.contains(testWG.getAnswer()));
-        Assertions.assertTrue(testWG.getGuesses().isEmpty());
+        assertFalse(testWG.getIsWin());
+        assertEquals(6, testWG.getAttempts());
+        assertTrue(testWords.contains(testWG.getAnswer()));
+        assertTrue(testWG.getGuesses().isEmpty());
     }
 
     @Test
+    @DisplayName("Проверка корректной обработки ввода")
     void testIsValidWord() {
-        Random random = new Random();
-        Assertions.assertTrue(testWG.isValidWord(testWords.get(random.nextInt(testWords.size()))));
-        Assertions.assertFalse(testWG.isValidWord("аббат"));
-        Assertions.assertFalse(testWG.isValidWord("аббатство"));
+        assertTrue(testWG.isValidWord(testWords.get(random.nextInt(testWords.size()))));
+        assertFalse(testWG.isValidWord("аббат"));
+        assertFalse(testWG.isValidWord("аббатство"));
     }
 
-    @Test //Тест на проверку работы метода
-    void testNormalizeInputWord() {
-        Assertions.assertTrue(testWD.contains(testWG.normalizeInputWord("котёл")));
-        Assertions.assertTrue(testWD.contains(testWG.normalizeInputWord("ГОРОД")));
-    }
-
-    //тест на проверку изменения переменных
     @Test
+    @DisplayName("Проверка форматирования ввода")
+    void testNormalizeInputWord() {
+        assertTrue(testWD.contains(testWG.normalizeInputWord("котёл")));
+        assertTrue(testWD.contains(testWG.normalizeInputWord("ГОРОД")));
+    }
+
+    @Test
+    @DisplayName("Проверка изменения переменных")
     void testMakeGuessValidWord() throws GameException {
-        Assertions.assertEquals(6, testWG.getAttempts());
-        Assertions.assertEquals(0, testWG.getAttemptsMade());
-        Assertions.assertEquals(0, testWG.getGuesses().size());
+        assertEquals(6, testWG.getAttempts());
+        assertEquals(0, testWG.getAttemptsMade());
+        assertEquals(0, testWG.getGuesses().size());
         testWG.setAnswer("лесок");
         testWG.makeGuess("город");
-        Assertions.assertEquals(5, testWG.getAttempts());
-        Assertions.assertEquals(1, testWG.getAttemptsMade());
-        Assertions.assertEquals(1, testWG.getGuesses().size());
+        assertEquals(5, testWG.getAttempts());
+        assertEquals(1, testWG.getAttemptsMade());
+        assertEquals(1, testWG.getGuesses().size());
         testWG.makeGuess("речка");
-        Assertions.assertEquals(4, testWG.getAttempts());
-        Assertions.assertEquals(2, testWG.getAttemptsMade());
-        Assertions.assertEquals(2, testWG.getGuesses().size());
+        assertEquals(4, testWG.getAttempts());
+        assertEquals(2, testWG.getAttemptsMade());
+        assertEquals(2, testWG.getGuesses().size());
     }
 
-    //тест на проверку победы
     @Test
+    @DisplayName("Проверка условий победы")
     void testMakeGuessWin() throws GameException {
-        Assertions.assertFalse(testWG.getIsWin());
+        assertFalse(testWG.getIsWin());
         testWG.setAnswer("город");
-        Assertions.assertEquals("+++++", testWG.makeGuess("город"));
-        Assertions.assertTrue(testWG.getIsWin());
+        assertEquals("+++++", testWG.makeGuess("город"));
+        assertTrue(testWG.getIsWin());
     }
 
-    //Тест на окончание игры
     @Test
+    @DisplayName("Проверка окончания игры")
     void testMakeGuessGameOver() throws GameException {
         assertFalse(testWG.isFinished());
         testWG.setAnswer("город");
@@ -99,39 +104,39 @@ class WordleTest {
         assertThrows(GameOverException.class, () -> testWG.makeGuess("речка"));
     }
 
-    // тест на некорректное слово
     @Test
+    @DisplayName("Проверка не учёта некорректного слова")
     void testMakeGuessInvalidWord() {
-        Assertions.assertEquals(6, testWG.getAttempts());
+        assertEquals(6, testWG.getAttempts());
         assertThrows(InvalidWordException.class, () -> testWG.makeGuess("неверное"));
-        Assertions.assertEquals(6, testWG.getAttempts());
+        assertEquals(6, testWG.getAttempts());
     }
 
-    //тест на корректный анализ слов
     @Test
+    @DisplayName("Проверка на корректный анализ слов")
     void testAnalyzeGuess() throws GameException {
         testWG.setAnswer("город");
-        Assertions.assertEquals("-+-+-", testWG.makeGuess("божок"));
-        Assertions.assertEquals("--^-^", testWG.makeGuess("авгур"));
-        Assertions.assertEquals("+++++", testWG.makeGuess("город"));
+        assertEquals("-+-+-", testWG.makeGuess("божок"));
+        assertEquals("--^-^", testWG.makeGuess("авгур"));
+        assertEquals("+++++", testWG.makeGuess("город"));
     }
 
-    // тест на проверку слова из подсказки
     @Test
+    @DisplayName("Проверка корректной работы подсказки")
     void testGetHintWithoutGuesses() {
-        Assertions.assertEquals(6, testWG.getAttempts());
-        Assertions.assertEquals(0, testWG.getGuesses().size());
+        assertEquals(6, testWG.getAttempts());
+        assertEquals(0, testWG.getGuesses().size());
         assertTrue(testWD.contains(testWG.getHint()));
-        Assertions.assertEquals(6, testWG.getAttempts());
+        assertEquals(6, testWG.getAttempts());
     }
 
-    // тест на победу подсказки
     @Test
+    @DisplayName("Проверка корректной победы через подсказки")
     void testGetWinWithHint() throws GameException {
         int i = 0;
 
-        Assertions.assertEquals(6, testWG.getAttempts());
-        Assertions.assertEquals(i, testWG.getGuesses().size());
+        assertEquals(6, testWG.getAttempts());
+        assertEquals(i, testWG.getGuesses().size());
         assertFalse(testWG.isFinished());
 
         while (!testWG.getIsWin()) {
@@ -140,8 +145,8 @@ class WordleTest {
         }
 
         assertTrue(testWG.isFinished());
-        Assertions.assertEquals(6, testWG.getAttempts());
-        Assertions.assertEquals(i, testWG.getGuesses().size());
+        assertEquals(6, testWG.getAttempts());
+        assertEquals(i, testWG.getGuesses().size());
 
         System.out.println(testWG.getGuesses());
     }

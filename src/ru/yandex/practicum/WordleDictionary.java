@@ -16,7 +16,7 @@ public class WordleDictionary {
     private HashSet<String> wordSet;
     private PrintWriter log;
 
-    Random random = new Random();
+    private Random random = new Random();
 
     public WordleDictionary(List<String> words, PrintWriter log) {
         this.words = words;

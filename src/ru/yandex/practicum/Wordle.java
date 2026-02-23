@@ -1,5 +1,10 @@
 package ru.yandex.practicum;
 
+import ru.yandex.practicum.exceptions.DictionaryLoadException;
+import ru.yandex.practicum.exceptions.GameException;
+import ru.yandex.practicum.exceptions.GameOverException;
+import ru.yandex.practicum.exceptions.InvalidWordException;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;

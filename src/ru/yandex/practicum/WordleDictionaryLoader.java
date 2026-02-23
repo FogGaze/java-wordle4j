@@ -1,5 +1,7 @@
 package ru.yandex.practicum;
 
+import ru.yandex.practicum.exceptions.DictionaryLoadException;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,7 +29,7 @@ public class WordleDictionaryLoader {
             String line;
             while ((line = fileReader.readLine()) != null) {
                 line = line.toLowerCase().replace("ё", "е");
-                if (line.length() == 5){
+                if (line.length() == 5) {
                     words.add(line);
                 }
             }
